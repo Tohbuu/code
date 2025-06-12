@@ -1,158 +1,126 @@
-// User data structure
-const users = JSON.parse(localStorage.getItem('slotMachineUsers')) || [];
-
 // DOM Elements
-const loginForm = document.getElementById('login-form');
-const registerForm = document.getElementById('register-form');
-const loginBtn = document.getElementById('login-btn');
-const registerBtn = document.getElementById('register-btn');
-const showRegister = document.getElementById('show-register');
-const showLogin = document.getElementById('show-login');
-const authContainer = document.getElementById('auth-container');
-const gameContainer = document.getElementById('game-container');
-const logoutBtn = document.getElementById('logout-btn');
-const usernameDisplay = document.getElementById('username-display');
-const coinsDisplay = document.getElementById('coins-display');
-const profilePic = document.getElementById('profile-pic');
+const profileBtn = document.getElementById('profile-btn');
+const profileModal = document.getElementById('profile-modal');
+const closeModalBtn = document.querySelector('.close-modal');
+const saveProfileBtn = document.getElementById('save-profile-btn');
+const savePasswordBtn = document.getElementById('save-password-btn');
+const soundBtn = document.getElementById('sound-btn');
+const avatarOptions = document.querySelectorAll('.avatar-option');
 const clickSound = document.getElementById('click-sound');
 
-// Current user
-let currentUser = null;
-
 // Event Listeners
-showRegister.addEventListener('click', (e) => {
-    e.preventDefault();
-    playSound(clickSound);
-    loginForm.classList.add('hidden');
-    registerForm.classList.remove('hidden');
-});
-
-showLogin.addEventListener('click', (e) => {
-    e.preventDefault();
-    playSound(clickSound);
-    registerForm.classList.add('hidden');
-    loginForm.classList.remove('hidden');
-});
-
-loginBtn.addEventListener('click', handleLogin);
-registerBtn.addEventListener('click', handleRegister);
-logoutBtn.addEventListener('click', handleLogout);
+profileBtn.addEventListener('click', openProfileModal);
+closeModalBtn.addEventListener('click', closeProfileModal);
+saveProfileBtn.addEventListener('click', saveProfile);
+savePasswordBtn.addEventListener('click', savePassword);
+soundBtn.addEventListener('click', toggleSound);
+avatarOptions.forEach(option => option.addEventListener('click', selectAvatar));
 
 // Functions
-function handleLogin(e) {
-    e.preventDefault();
+function openProfileModal() {
     playSound(clickSound);
+    profileModal.classList.remove('hidden');
     
-    const username = document.getElementById('login-username').value;
-    const password = document.getElementById('login-password').value;
-    
-    const user = users.find(u => u.username === username && u.password === password);
-    
-    if (user) {
-        currentUser = user;
-        updateUserDisplay();
-        authContainer.classList.add('hidden');
-        gameContainer.classList.remove('hidden');
-        
-        // Reset forms
-        document.getElementById('login-form').reset();
-    } else {
-        alert('Invalid username or password!');
+    // Select current avatar
+    if (currentUser) {
+        avatarOptions.forEach(option => {
+            option.classList.remove('selected');
+            if (option.dataset.avatar === currentUser.avatar) {
+                option.classList.add('selected');
+            }
+        });
     }
 }
 
-function handleRegister(e) {
-    e.preventDefault();
+function closeProfileModal() {
     playSound(clickSound);
-    
-    const username = document.getElementById('register-username').value;
-    const email = document.getElementById('register-email').value;
-    const password = document.getElementById('register-password').value;
-    const confirmPassword = document.getElementById('register-confirm').value;
-    
-    if (password !== confirmPassword) {
-        alert('Passwords do not match!');
-        return;
-    }
-    
-    if (users.some(u => u.username === username)) {
-        alert('Username already exists!');
-        return;
-    }
-    
-    const newUser = {
-        username,
-        email,
-        password,
-        coins: 1000,
-        avatar: 'paw',
-        betAmount: 10,
-        lastWin: 0,
-        winHistory: [],
-        soundOn: true
-    };
-    
-    users.push(newUser);
-    localStorage.setItem('slotMachineUsers', JSON.stringify(users));
-    
-    currentUser = newUser;
-    updateUserDisplay();
-    authContainer.classList.add('hidden');
-    gameContainer.classList.remove('hidden');
-    
-    // Reset forms
-    document.getElementById('register-form').reset();
-    loginForm.classList.remove('hidden');
-    registerForm.classList.add('hidden');
+    profileModal.classList.add('hidden');
 }
 
-function handleLogout() {
+function selectAvatar(e) {
+    playSound(clickSound);
+    avatarOptions.forEach(option => option.classList.remove('selected'));
+    e.target.classList.add('selected');
+}
+
+function saveProfile() {
     playSound(clickSound);
     
-    // Save user data before logging out
+    if (!currentUser) return;
+    
+    // Save selected avatar
+    const selectedAvatar = document.querySelector('.avatar-option.selected');
+    if (selectedAvatar) {
+        currentUser.avatar = selectedAvatar.dataset.avatar;
+        profilePic.src = `images/symbols/${currentUser.avatar}.png`;
+    }
+    
+    // Save to local storage
     const userIndex = users.findIndex(u => u.username === currentUser.username);
     if (userIndex !== -1) {
         users[userIndex] = currentUser;
         localStorage.setItem('slotMachineUsers', JSON.stringify(users));
     }
     
-    currentUser = null;
-    authContainer.classList.remove('hidden');
-    gameContainer.classList.add('hidden');
+    closeProfileModal();
 }
 
-function updateUserDisplay() {
+function savePassword() {
+    playSound(clickSound);
+    
     if (!currentUser) return;
     
-    usernameDisplay.textContent = currentUser.username;
-    coinsDisplay.textContent = `${currentUser.coins} coins`;
-    profilePic.src = `images/symbols/${currentUser.avatar}.png`;
+    const currentPassword = document.getElementById('current-password').value;
+    const newPassword = document.getElementById('new-password').value;
+    const confirmNewPassword = document.getElementById('confirm-new-password').value;
     
-    // Update bet amount in slot machine if it exists
-    if (document.getElementById('current-bet')) {
-        document.getElementById('current-bet').textContent = currentUser.betAmount;
+    if (currentPassword !== currentUser.password) {
+        alert('Current password is incorrect!');
+        return;
+    }
+    
+    if (newPassword !== confirmNewPassword) {
+        alert('New passwords do not match!');
+        return;
+    }
+    
+    if (newPassword.length < 6) {
+        alert('Password must be at least 6 characters!');
+        return;
+    }
+    
+    currentUser.password = newPassword;
+    
+    // Save to local storage
+    const userIndex = users.findIndex(u => u.username === currentUser.username);
+    if (userIndex !== -1) {
+        users[userIndex] = currentUser;
+        localStorage.setItem('slotMachineUsers', JSON.stringify(users));
+    }
+    
+    alert('Password changed successfully!');
+    document.getElementById('current-password').value = '';
+    document.getElementById('new-password').value = '';
+    document.getElementById('confirm-new-password').value = '';
+}
+
+function toggleSound() {
+    playSound(clickSound);
+    
+    if (!currentUser) return;
+    
+    currentUser.soundOn = !currentUser.soundOn;
+    soundBtn.innerHTML = currentUser.soundOn ? '<i class="fas fa-volume-up"></i>' : '<i class="fas fa-volume-mute"></i>';
+    
+    // Save to local storage
+    const userIndex = users.findIndex(u => u.username === currentUser.username);
+    if (userIndex !== -1) {
+        users[userIndex] = currentUser;
+        localStorage.setItem('slotMachineUsers', JSON.stringify(users));
     }
 }
 
-function playSound(soundElement) {
-    if (currentUser && !currentUser.soundOn) return;
-    soundElement.currentTime = 0;
-    soundElement.play().catch(e => console.log('Sound play failed:', e));
+// Initialize sound button
+if (currentUser) {
+    soundBtn.innerHTML = currentUser.soundOn ? '<i class="fas fa-volume-up"></i>' : '<i class="fas fa-volume-mute"></i>';
 }
-
-// Check if user is already logged in (for page refresh)
-function checkLoggedInUser() {
-    const loggedInUsername = sessionStorage.getItem('loggedInUser');
-    if (loggedInUsername) {
-        const user = users.find(u => u.username === loggedInUsername);
-        if (user) {
-            currentUser = user;
-            updateUserDisplay();
-            authContainer.classList.add('hidden');
-            gameContainer.classList.remove('hidden');
-        }
-    }
-}
-
-// Initialize
-checkLoggedInUser();
