@@ -10,11 +10,8 @@
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&display=swap" rel="stylesheet">
 
-    <!-- Styles -->
-    <link rel="stylesheet" href="{{ mix('css/app.css') }}">
-
-    <!-- Scripts -->
-    <script src="{{ mix('js/app.js') }}" defer></script>
+    <!-- Styles & Scripts -->
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body>
     <div id="app"></div>

@@ -87,5 +87,88 @@ export default {
 </script>
 
 <style scoped>
-/* Same styles as Login.vue */
+.auth-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+}
+
+.auth-card {
+  background: rgba(26, 26, 46, 0.8);
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: 0 0 20px rgba(247, 37, 133, 0.3);
+  width: 100%;
+  max-width: 400px;
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--primary-color);
+}
+
+.auth-title {
+  color: var(--primary-color);
+  text-align: center;
+  margin-bottom: 1.5rem;
+  font-size: 1.8rem;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-input {
+  padding: 0.8rem;
+  border-radius: 5px;
+  border: 1px solid #444;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  font-size: 1rem;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+}
+
+.auth-button {
+  padding: 0.8rem;
+  border-radius: 5px;
+  border: none;
+  background: var(--primary-color);
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s;
+  margin-top: 1rem;
+}
+
+.auth-button:hover {
+  background: #4a0cd3;
+}
+
+.auth-footer {
+  text-align: center;
+  margin-top: 1.5rem;
+  color: #aaa;
+}
+
+.auth-link {
+  color: var(--primary-color);
+  text-decoration: none;
+}
+
+.error-message {
+  color: #ff6b6b;
+  text-align: center;
+  margin-top: 1rem;
+}
 </style>
