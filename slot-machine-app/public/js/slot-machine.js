@@ -62,30 +62,45 @@ document.addEventListener('DOMContentLoaded', () => {
       });
   }
   
-  // Create 3D reel elements
+  // Create 3D reel elements with enhanced styling
   function createReels() {
     reelsContainer.innerHTML = '';
-    
+
     for (let i = 0; i < 3; i++) {
       const reel = document.createElement('div');
       reel.className = 'reel';
       reel.dataset.reelIndex = i;
-      
-      // Create 3D reel faces
+      reel.style.transformStyle = 'preserve-3d';
+      reel.style.width = '120px';
+      reel.style.height = '160px';
+      reel.style.position = 'relative';
+
+      // Create 6 faces (for 6 symbols)
       for (let j = 0; j < 6; j++) {
         const face = document.createElement('div');
         face.className = 'reel-face';
+        face.style.position = 'absolute';
+        face.style.width = '100%';
+        face.style.height = '100%';
+        face.style.display = 'flex';
+        face.style.justifyContent = 'center';
+        face.style.alignItems = 'center';
+        face.style.backfaceVisibility = 'hidden';
+        face.style.borderRadius = '10px';
+        face.style.background = 'rgba(0, 0, 0, 0.3)';
         face.style.transform = `rotateX(${j * 60}deg) translateZ(100px)`;
-        
+
         const symbolImg = document.createElement('img');
         symbolImg.className = 'reel-symbol';
         symbolImg.src = `/images/symbols/${SYMBOLS[j].name}.png`;
         symbolImg.alt = SYMBOLS[j].name;
-        
+        symbolImg.style.maxWidth = '80%';
+        symbolImg.style.maxHeight = '80%';
+
         face.appendChild(symbolImg);
         reel.appendChild(face);
       }
-      
+
       reelsContainer.appendChild(reel);
     }
   }
@@ -171,20 +186,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
   
-  // Animate reels with 3D spinning effect
+  // Animate reels with 3D spinning effect (enhanced version)
   async function animateReels(finalSymbols) {
     const reels = document.querySelectorAll('.reel');
     const spinDuration = 2000; // 2 seconds
-    const frames = 60; // Frames per second
+    const frames = 60; // FPS
     const totalFrames = (spinDuration / 1000) * frames;
     
-    // Create animation promises for each reel
     const animations = Array.from(reels).map((reel, index) => {
       return new Promise((resolve) => {
         let frame = 0;
         const startRotation = 0;
         const endRotation = 1080 + (index * 120); // 3 full rotations + stagger
-        
+
         const animate = () => {
           frame++;
           const progress = frame / totalFrames;
@@ -192,7 +206,7 @@ document.addEventListener('DOMContentLoaded', () => {
           const rotation = startRotation + (endRotation * easeProgress);
           
           reel.style.transform = `rotateX(${rotation}deg)`;
-          
+
           if (frame < totalFrames) {
             requestAnimationFrame(animate);
           } else {
@@ -203,12 +217,11 @@ document.addEventListener('DOMContentLoaded', () => {
             resolve();
           }
         };
-        
+
         animate();
       });
     });
-    
-    // Wait for all reels to finish
+
     await Promise.all(animations);
   }
   
@@ -250,6 +263,12 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
       bonusElement.remove();
     }, 3000);
+  }
+  
+  // Show result message
+  function showResult(message, isWin) {
+    resultDisplay.textContent = message;
+    resultDisplay.className = `result-display ${isWin ? 'win' : ''}`;
   }
   
   // Update displays
