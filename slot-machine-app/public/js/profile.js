@@ -166,3 +166,84 @@ function showMessage(message, isSuccess) {
     }, 300);
   }, 3000);
 }
+
+
+
+
+// Add this to the existing profile.js
+
+function setupAvatarUpload() {
+  const avatarInput = document.createElement('input');
+  avatarInput.type = 'file';
+  avatarInput.accept = 'image/*';
+  avatarInput.id = 'avatar-file-input';
+  avatarInput.style.display = 'none';
+  document.body.appendChild(avatarInput);
+  
+  const avatarPreview = document.querySelector('.avatar-preview');
+  const uploadBtn = document.querySelector('.avatar-upload-btn');
+  
+  uploadBtn.addEventListener('click', () => {
+    avatarInput.click();
+  });
+  
+  avatarInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 2 * 1024 * 1024) { // 2MB limit
+        showMessage('Image must be less than 2MB', false);
+        return;
+      }
+      
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        avatarPreview.src = event.target.result;
+        uploadAvatar(file);
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+}
+
+function uploadAvatar(file) {
+  const formData = new FormData();
+  formData.append('avatar', file);
+  
+  fetch('/api/users/avatar', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('token')}`
+    },
+    body: formData
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      showMessage('Avatar updated successfully!', true);
+    } else {
+      showMessage(data.error || 'Failed to upload avatar', false);
+    }
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    showMessage('Error uploading avatar', false);
+  });
+}
+
+// Add this to the loadProfile function
+function loadProfile() {
+  // ... existing code ...
+  
+  // Add avatar upload section
+  const profileForm = document.querySelector('.profile-form');
+  const avatarUploadSection = document.createElement('div');
+  avatarUploadSection.className = 'avatar-upload';
+  avatarUploadSection.innerHTML = `
+    <h3>Profile Picture</h3>
+    <img src="/images/avatars/default.png" class="avatar-preview">
+    <button type="button" class="avatar-upload-btn">Change Avatar</button>
+  `;
+  profileForm.parentNode.insertBefore(avatarUploadSection, profileForm);
+  
+  setupAvatarUpload();
+}
